@@ -3,16 +3,17 @@ package com.kakaopay.homework.service.impl;
 import com.kakaopay.homework.dao.InstituteRepository;
 import com.kakaopay.homework.dao.MonthlyMortgageRepository;
 import com.kakaopay.homework.domain.MonthlyMortgage;
-import com.kakaopay.homework.domain.response.AggregatedByYear;
+import com.kakaopay.homework.domain.response.AggregatedMax;
+import com.kakaopay.homework.domain.response.AggregatedSum;
 import com.kakaopay.homework.service.DataAggregateService;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -31,12 +32,13 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     }
 
     @Override
-    public List<AggregatedByYear> aggregateByYear() throws IOException {
+    public List<AggregatedSum> aggregateSum() throws IOException {
         Stream<MonthlyMortgage> monthlyMortgageStream =
                 StreamSupport.stream(monthlyMortgageRepository.findAll().spliterator(), false);
-        Map<Integer, List<MonthlyMortgage>> groupedByYear = monthlyMortgageStream.collect(
-                Collectors.groupingBy(MonthlyMortgage::getYear));
-        return groupedByYear.entrySet().stream().map(entry -> {
+        Map<Integer, List<MonthlyMortgage>> mortgagesByYear =
+                monthlyMortgageStream.collect(Collectors.groupingBy(MonthlyMortgage::getYear));
+
+        return mortgagesByYear.entrySet().stream().map(entry -> {
             Integer year = entry.getKey();
             List<MonthlyMortgage> mortgagesOfYear = entry.getValue();
 
@@ -47,7 +49,7 @@ public class DataAggregateServiceImpl implements DataAggregateService {
             Map<String, Integer> detailedAmount = groupedByInstituteName.entrySet()
                     .stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> totalAmountOfMortgages(e.getValue())));
-            return AggregatedByYear.builder()
+            return AggregatedSum.builder()
                     .year(year)
                     .totalAmount(totalAmount)
                     .detailedByInstitute(detailedAmount)
@@ -55,14 +57,34 @@ public class DataAggregateServiceImpl implements DataAggregateService {
         }).collect(Collectors.toList());
     }
 
-    private Integer totalAmountOfMortgages(List<MonthlyMortgage> mortgages) {
-        return mortgages.stream().collect(Collectors.summingInt(MonthlyMortgage::getAmount100M));
+    @Override
+    public AggregatedMax aggregateMax() throws Exception {
+        Stream<MonthlyMortgage> monthlyMortgageStream =
+                StreamSupport.stream(monthlyMortgageRepository.findAll().spliterator(), false);
+        Map<Integer, Map<String, Integer>> a =
+                monthlyMortgageStream.collect(Collectors.groupingBy(
+                        MonthlyMortgage::getYear, Collectors.groupingBy(m -> m.getInstitute().getName(),
+                                Collectors.summingInt(MonthlyMortgage::getAmount100M))));
+        Stream<AggregatedMax> triplets = a.entrySet().stream().flatMap(entry -> {
+            Integer year = entry.getKey();
+
+            return entry.getValue()
+                    .entrySet()
+                    .stream()
+                    .map(innerEntry -> AggregatedMax.builder()
+                            .year(year)
+                            .instituteName(innerEntry.getKey())
+                            .amount(innerEntry.getValue())
+                            .build());
+        });
+        Optional<AggregatedMax> t = triplets.max(Comparator.comparingInt(AggregatedMax::getAmount));
+        if (!t.isPresent()) {
+            throw new Exception();
+        }
+        return t.get();
     }
 
-    @Data
-    @AllArgsConstructor
-    static class Tuple {
-        private Integer year;
-        private String instituteName;
+    private Integer totalAmountOfMortgages(List<MonthlyMortgage> mortgages) {
+        return mortgages.stream().collect(Collectors.summingInt(MonthlyMortgage::getAmount100M));
     }
 }

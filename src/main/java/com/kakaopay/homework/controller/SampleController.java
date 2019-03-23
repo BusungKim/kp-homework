@@ -3,7 +3,8 @@ package com.kakaopay.homework.controller;
 import com.kakaopay.homework.domain.Institute;
 import com.kakaopay.homework.domain.MonthlyMortgage;
 import com.kakaopay.homework.domain.request.LocalFileReadRequest;
-import com.kakaopay.homework.domain.response.AggregatedByYear;
+import com.kakaopay.homework.domain.response.AggregatedMax;
+import com.kakaopay.homework.domain.response.AggregatedSum;
 import com.kakaopay.homework.service.DataAggregateService;
 import com.kakaopay.homework.service.DataReadService;
 import com.kakaopay.homework.service.SampleService;
@@ -56,8 +57,13 @@ public class SampleController {
         return sampleService::getAllMortgages;
     }
 
-    @PostMapping("/mortgages/aggregate")
-    public Callable<List<AggregatedByYear>> aggregateByYear() {
-        return dataAggregateService::aggregateByYear;
+    @PostMapping("/mortgages/aggregate/sum")
+    public Callable<List<AggregatedSum>> aggregateSum() {
+        return dataAggregateService::aggregateSum;
+    }
+
+    @PostMapping("/mortgages/aggregate/max")
+    public Callable<AggregatedMax> aggregateMax() {
+        return dataAggregateService::aggregateMax;
     }
 }

@@ -4,13 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.Map;
-
 @Data
 @Builder
 @AllArgsConstructor
-public class AggregatedByYear {
+public class AggregatedMax {
     private Integer year;
-    private Integer totalAmount;
-    private Map<String, Integer> detailedByInstitute;
+    private String instituteName;
+    private Integer amount;
 }
