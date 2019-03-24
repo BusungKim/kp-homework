@@ -1,14 +1,13 @@
 package com.kakaopay.homework.controller;
 
 import com.kakaopay.homework.domain.entity.Institute;
-import com.kakaopay.homework.domain.entity.MonthlyMortgage;
 import com.kakaopay.homework.domain.request.LocalFileReadRequest;
 import com.kakaopay.homework.domain.response.AggregatedByYearAndName;
 import com.kakaopay.homework.domain.response.MinMaxOfAvg;
 import com.kakaopay.homework.domain.response.SumByYear;
 import com.kakaopay.homework.service.DataAggregateService;
 import com.kakaopay.homework.service.DataReadService;
-import com.kakaopay.homework.service.SampleService;
+import com.kakaopay.homework.service.InstituteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,24 +19,24 @@ import java.util.concurrent.Callable;
 @RequestMapping("/v1")
 public class SampleController {
 
-    private final SampleService sampleService;
+    private final InstituteService instituteService;
     private final DataReadService dataReadService;
     private final DataAggregateService dataAggregateService;
 
-    public SampleController(final SampleService sampleService,
+    public SampleController(final InstituteService instituteService,
                             final DataReadService dataReadService,
                             final DataAggregateService dataAggregateService) {
-        this.sampleService = sampleService;
+        this.instituteService = instituteService;
         this.dataReadService = dataReadService;
         this.dataAggregateService = dataAggregateService;
     }
 
-    @PostMapping("/run")
-    public void run() {
-        sampleService.test();
+    @GetMapping("/institutes")
+    public Callable<List<Institute>> getAllInstitute() {
+        return instituteService::getAllInstitutes;
     }
 
-    @PostMapping("/persist-csv")
+    @PostMapping("/local-csv")
     public Callable<Void> persistLocalCsv(
             @RequestBody final LocalFileReadRequest localFileReadRequest) {
         return () -> {
@@ -45,16 +44,6 @@ public class SampleController {
                     localFileReadRequest.getCharset());
             return null;
         };
-    }
-
-    @GetMapping("/institutes")
-    public Callable<List<Institute>> getAllInstitute() {
-        return sampleService::getAllInstitutes;
-    }
-
-    @GetMapping("/mortgages/monthly")
-    public Callable<List<MonthlyMortgage>> getAllMortgages() {
-        return sampleService::getAllMortgages;
     }
 
     @GetMapping("/mortgages/year/sum")
