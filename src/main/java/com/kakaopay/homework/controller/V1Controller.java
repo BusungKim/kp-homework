@@ -17,15 +17,15 @@ import java.util.concurrent.Callable;
 @Slf4j
 @RestController
 @RequestMapping("/v1")
-public class SampleController {
+public class V1Controller {
 
     private final InstituteService instituteService;
     private final DataReadService dataReadService;
     private final DataAggregateService dataAggregateService;
 
-    public SampleController(final InstituteService instituteService,
-                            final DataReadService dataReadService,
-                            final DataAggregateService dataAggregateService) {
+    public V1Controller(final InstituteService instituteService,
+                        final DataReadService dataReadService,
+                        final DataAggregateService dataAggregateService) {
         this.instituteService = instituteService;
         this.dataReadService = dataReadService;
         this.dataAggregateService = dataAggregateService;

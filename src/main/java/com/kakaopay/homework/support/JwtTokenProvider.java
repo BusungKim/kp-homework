@@ -1,5 +1,7 @@
 package com.kakaopay.homework.support;
 
+import com.kakaopay.homework.dao.UserRepository;
+import com.kakaopay.homework.domain.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -17,11 +19,14 @@ public class JwtTokenProvider {
 
     private Key encodedSecretKey;
     private long aliveDurationMilli;
+    private UserRepository userRepository;
 
     public JwtTokenProvider(@Value("${security.jwt.token.secretKey}") final String secretKey,
-                            @Value("${security.jwt.token.aliveDurationMilli}") final long aliveDurationMilli) {
+                            @Value("${security.jwt.token.aliveDurationMilli}") final long aliveDurationMilli,
+                            final UserRepository userRepository) {
         this.encodedSecretKey = Keys.hmacShaKeyFor(Base64.getEncoder().encode(secretKey.getBytes()));
         this.aliveDurationMilli = aliveDurationMilli;
+        this.userRepository = userRepository;
     }
 
     public String createToken(String userId) {
@@ -40,16 +45,26 @@ public class JwtTokenProvider {
 
     public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader("Authorization");
+        log.info("token = {}", bearerToken);
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7, bearerToken.length());
         }
         return null;
     }
 
+    public String getUserId(String token) {
+        return Jwts.parser().setSigningKey(encodedSecretKey).parseClaimsJws(token).getBody().getSubject();
+    }
+
     public boolean validateToken(String token) {
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(encodedSecretKey).parseClaimsJws(token);
-            return claims.getBody().getExpiration().after(new Date());
+            Claims body = claims.getBody();
+            if (body.getExpiration().before(new Date())) {
+                return false;
+            }
+            User user = userRepository.findOne(body.getSubject());
+            return user != null;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
