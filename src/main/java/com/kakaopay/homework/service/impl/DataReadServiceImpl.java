@@ -8,6 +8,7 @@ import com.kakaopay.homework.domain.CsvMeta;
 import com.kakaopay.homework.domain.Record;
 import com.kakaopay.homework.domain.entity.Institute;
 import com.kakaopay.homework.domain.entity.MonthlyMortgage;
+import com.kakaopay.homework.exception.server.DataReadWriteFailException;
 import com.kakaopay.homework.service.DataReadService;
 import com.kakaopay.homework.support.TextReader;
 import lombok.extern.slf4j.Slf4j;
@@ -38,14 +39,20 @@ public class DataReadServiceImpl implements DataReadService {
     }
 
     @Override
-    public void readAndStoreData(String path, String charset) throws Exception {
-        Stream<List<String>> data = readCsvFromFile(path, charset);
+    public void readAndStoreData(String path, String charset) throws DataReadWriteFailException {
+        Stream<List<String>> data;
+        try {
+            data = readCsvFromFile(path, charset);
+        } catch (IOException e) {
+            log.error("Failed to read data from csv file. path={}, charset={}", path, charset, e);
+            throw new DataReadWriteFailException();
+        }
         Stream<List<Record>> recordsByRow = data.skip(1).map(line -> {
             try {
                 return mapDataToRecordRow(line);
             } catch (Exception e) {
                 log.error("Failed to read data. It is wrong typed. {}", line, e);
-                throw new RuntimeException();
+                throw new DataReadWriteFailException("Wrong typed data row.");
             }
         });
         recordsByRow.forEach(records -> {
@@ -53,7 +60,7 @@ public class DataReadServiceImpl implements DataReadService {
                 storeRecords(records);
             } catch (Exception e) {
                 log.error("Failed to store data.", e);
-                throw new RuntimeException();
+                throw new DataReadWriteFailException();
             }
         });
     }
@@ -79,7 +86,6 @@ public class DataReadServiceImpl implements DataReadService {
                 .collect(Collectors.toList());
     }
 
-    //    @Transactional
     private void storeRecords(List<Record> records) throws Exception {
         List<CsvMeta> csvMetaList = instituteConfig.getNameAndCodes();
         List<Institute> institutes = csvMetaList.stream()

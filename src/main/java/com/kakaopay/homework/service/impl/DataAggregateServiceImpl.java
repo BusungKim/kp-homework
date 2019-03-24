@@ -7,11 +7,12 @@ import com.kakaopay.homework.domain.entity.MonthlyMortgage;
 import com.kakaopay.homework.domain.response.AggregatedByYearAndName;
 import com.kakaopay.homework.domain.response.MinMaxOfAvg;
 import com.kakaopay.homework.domain.response.SumByYear;
+import com.kakaopay.homework.exception.client.UnregisteredInstituteException;
+import com.kakaopay.homework.exception.server.AggregateOperationFailException;
 import com.kakaopay.homework.service.DataAggregateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -34,33 +35,36 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     }
 
     @Override
-    public List<SumByYear> aggregateSum() throws IOException {
+    public List<SumByYear> aggregateSum() throws AggregateOperationFailException {
         Stream<MonthlyMortgage> monthlyMortgageStream =
                 StreamSupport.stream(monthlyMortgageRepository.findAll().spliterator(), false);
-        Map<Integer, List<MonthlyMortgage>> mortgagesByYear =
-                monthlyMortgageStream.collect(Collectors.groupingBy(MonthlyMortgage::getYear));
 
-        return mortgagesByYear.entrySet().stream().map(entry -> {
-            Integer year = entry.getKey();
-            List<MonthlyMortgage> mortgagesOfYear = entry.getValue();
+        return monthlyMortgageStream.collect(Collectors.groupingBy(MonthlyMortgage::getYear))
+                .entrySet()
+                .stream()
+                .map(entry -> {
+                    Integer year = entry.getKey();
+                    List<MonthlyMortgage> mortgagesOfYear = entry.getValue();
 
-            Integer totalAmount = mortgagesOfYear.stream()
-                    .collect(Collectors.summingInt(MonthlyMortgage::getAmount100M));
-            Map<String, List<MonthlyMortgage>> groupedByInstituteName = mortgagesOfYear.stream()
-                    .collect(Collectors.groupingBy(mortgage -> mortgage.getInstitute().getName()));
-            Map<String, Integer> detailedAmount = groupedByInstituteName.entrySet()
-                    .stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, e -> totalAmountOfMortgages(e.getValue())));
-            return SumByYear.builder()
-                    .year(year)
-                    .totalAmount(totalAmount)
-                    .detailedByInstitute(detailedAmount)
-                    .build();
-        }).collect(Collectors.toList());
+                    Integer totalAmount = mortgagesOfYear.stream()
+                            .collect(Collectors.summingInt(MonthlyMortgage::getAmount100M));
+                    Map<String, Integer> detailedAmount = mortgagesOfYear.stream()
+                            .collect(Collectors.groupingBy(mortgage -> mortgage.getInstitute().getName()))
+                            .entrySet()
+                            .stream()
+                            .collect(Collectors.toMap(Map.Entry::getKey, e -> totalAmountOfMortgages(e.getValue())));
+
+                    return SumByYear.builder()
+                            .year(year)
+                            .totalAmount(totalAmount)
+                            .detailedByInstitute(detailedAmount)
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
-    public AggregatedByYearAndName aggregateMax() throws Exception {
+    public AggregatedByYearAndName aggregateMax() throws AggregateOperationFailException {
         Stream<MonthlyMortgage> monthlyMortgageStream =
                 StreamSupport.stream(monthlyMortgageRepository.findAll().spliterator(), false);
         Map<Integer, Map<String, Integer>> groupedByYearAndName =
@@ -82,31 +86,47 @@ public class DataAggregateServiceImpl implements DataAggregateService {
         Optional<AggregatedByYearAndName> t = triplets.max(Comparator.comparingInt(AggregatedByYearAndName::getAmount));
         if (!t.isPresent()) {
             log.error("There is no max aggregated");
-            throw new Exception();
+            throw new AggregateOperationFailException();
         }
         return t.get();
     }
 
     @Override
-    public MinMaxOfAvg findMinAndMaxOfAvg(String instituteCode) throws Exception {
+    public MinMaxOfAvg findMinAndMaxOfAvg(String instituteCode)
+            throws AggregateOperationFailException, UnregisteredInstituteException {
         Institute institute = instituteRepository.findByCode(instituteCode);
         if (institute == null) {
             log.error("Unregistered institute. {}", instituteCode);
-            throw new Exception();
+            throw new UnregisteredInstituteException();
         }
-        Map<Integer, List<MonthlyMortgage>> sumByYear = monthlyMortgageRepository.findByInstitute(institute)
-                .stream().collect(Collectors.groupingBy(MonthlyMortgage::getYear));
-        Map<Integer, Double> avgByYear = sumByYear.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, m -> avgAmountOfMortgages(m.getValue())));
-        List<MinMaxOfAvg.Pair> flattend = avgByYear.entrySet().stream().map(entry -> MinMaxOfAvg.Pair.builder().year(entry.getKey()).average(entry.getValue()).build()).collect(Collectors.toList());
-        Optional<MinMaxOfAvg.Pair> minAverage = flattend.stream().min(Comparator.comparingDouble(MinMaxOfAvg.Pair::getAverage));
-        Optional<MinMaxOfAvg.Pair> maxAverage = flattend.stream().max(Comparator.comparingDouble(MinMaxOfAvg.Pair::getAverage));
+        Map<Integer, Double> avgByYear = monthlyMortgageRepository.findByInstitute(institute)
+                .stream()
+                .collect(Collectors.groupingBy(MonthlyMortgage::getYear))
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, m -> avgAmountOfMortgages(m.getValue())));
+        List<MinMaxOfAvg.Pair> flattend = avgByYear.entrySet()
+                .stream()
+                .map(entry -> MinMaxOfAvg.Pair.builder()
+                        .year(entry.getKey())
+                        .average(entry.getValue())
+                        .build())
+                .collect(Collectors.toList());
+        Optional<MinMaxOfAvg.Pair> minAverage = flattend.stream()
+                .min(Comparator.comparingDouble(MinMaxOfAvg.Pair::getAverage));
+        Optional<MinMaxOfAvg.Pair> maxAverage = flattend.stream()
+                .max(Comparator.comparingDouble(MinMaxOfAvg.Pair::getAverage));
 
         if (!minAverage.isPresent() || !maxAverage.isPresent()) {
             log.error("There is no min or max average");
-            throw new Exception();
+            throw new AggregateOperationFailException();
         }
 
-        return MinMaxOfAvg.builder().name(institute.getName()).minOfAvg(minAverage.get()).maxOfAvg(maxAverage.get()).build();
+        return MinMaxOfAvg.builder()
+                .name(institute.getName())
+                .minOfAvg(minAverage.get())
+                .maxOfAvg(maxAverage.get())
+                .build();
     }
 
     private Integer totalAmountOfMortgages(List<MonthlyMortgage> mortgages) {
