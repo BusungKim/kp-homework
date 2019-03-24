@@ -5,7 +5,10 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "MONTHLY_MORTGAGE")
+@Table(name = "MONTHLY_MORTGAGE", indexes = {
+        @Index(name = "year_month_institute", columnList = "year,month,institute", unique = true),
+        @Index(name = "institute", columnList = "institute")
+})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

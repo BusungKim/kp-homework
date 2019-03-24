@@ -8,7 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "INSTITUTE")
+@Table(name = "INSTITUTE", indexes = {
+        @Index(name = "institute_name", columnList = "name", unique = true),
+        @Index(name = "institute_code", columnList = "code", unique = true)
+})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
