@@ -2,7 +2,7 @@ package com.kakaopay.homework.config;
 
 import com.kakaopay.homework.dao.InstituteRepository;
 import com.kakaopay.homework.domain.CsvMeta;
-import com.kakaopay.homework.domain.Institute;
+import com.kakaopay.homework.domain.entity.Institute;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;

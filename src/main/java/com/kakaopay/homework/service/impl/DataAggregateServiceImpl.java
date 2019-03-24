@@ -2,8 +2,8 @@ package com.kakaopay.homework.service.impl;
 
 import com.kakaopay.homework.dao.InstituteRepository;
 import com.kakaopay.homework.dao.MonthlyMortgageRepository;
-import com.kakaopay.homework.domain.Institute;
-import com.kakaopay.homework.domain.MonthlyMortgage;
+import com.kakaopay.homework.domain.entity.Institute;
+import com.kakaopay.homework.domain.entity.MonthlyMortgage;
 import com.kakaopay.homework.domain.response.AggregatedByYearAndName;
 import com.kakaopay.homework.domain.response.MinMaxOfAvg;
 import com.kakaopay.homework.domain.response.SumByYear;

@@ -1,7 +1,7 @@
 package com.kakaopay.homework.controller;
 
-import com.kakaopay.homework.domain.Institute;
-import com.kakaopay.homework.domain.MonthlyMortgage;
+import com.kakaopay.homework.domain.entity.Institute;
+import com.kakaopay.homework.domain.entity.MonthlyMortgage;
 import com.kakaopay.homework.domain.request.LocalFileReadRequest;
 import com.kakaopay.homework.domain.response.AggregatedByYearAndName;
 import com.kakaopay.homework.domain.response.MinMaxOfAvg;
@@ -31,7 +31,6 @@ public class SampleController {
         this.dataReadService = dataReadService;
         this.dataAggregateService = dataAggregateService;
     }
-
 
     @PostMapping("/run")
     public void run() {

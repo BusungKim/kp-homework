@@ -1,4 +1,4 @@
-package com.kakaopay.homework.domain;
+package com.kakaopay.homework.domain.entity;
 
 import lombok.*;
 

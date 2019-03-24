@@ -3,8 +3,8 @@ package com.kakaopay.homework.service;
 import com.google.common.collect.Lists;
 import com.kakaopay.homework.dao.InstituteRepository;
 import com.kakaopay.homework.dao.MonthlyMortgageRepository;
-import com.kakaopay.homework.domain.Institute;
-import com.kakaopay.homework.domain.MonthlyMortgage;
+import com.kakaopay.homework.domain.entity.Institute;
+import com.kakaopay.homework.domain.entity.MonthlyMortgage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

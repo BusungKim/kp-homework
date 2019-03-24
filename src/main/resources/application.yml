@@ -24,3 +24,7 @@ institute:
       code: exchange
     - name: 기타은행
       code: etc
+
+security.jwt.token:
+  secretKey: ald9fj3kdfnvkcaldkfi3kdnvkir3848
+  aliveDurationMilli: 3600000 # an hour

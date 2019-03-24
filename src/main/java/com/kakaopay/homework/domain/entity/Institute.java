@@ -1,4 +1,4 @@
-package com.kakaopay.homework.domain;
+package com.kakaopay.homework.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "INSTITUTE")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
