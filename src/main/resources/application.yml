@@ -24,13 +24,3 @@ institute:
       code: exchange
     - name: 기타은행
       code: etc
-#  nameToCode:
-#    주택도시기금: jutek
-#    국민은행: kookmin
-#    우리은행: woori
-#    신한은행: shinhan
-#    한국시티은행: hankookcity
-#    하나은행: hana
-#    농협은행/수협은행: nhsh
-#    외환은행: exchange
-#    기타은행: etc
