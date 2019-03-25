@@ -67,11 +67,11 @@ public class DataAggregateServiceImpl implements DataAggregateService {
     public AggregatedByYearAndName aggregateMax() throws AggregateOperationFailException {
         Stream<MonthlyMortgage> monthlyMortgageStream =
                 StreamSupport.stream(monthlyMortgageRepository.findAll().spliterator(), false);
-        Map<Integer, Map<String, Integer>> groupedByYearAndName =
+        Map<Integer, Map<String, Integer>> sumByYearAndName =
                 monthlyMortgageStream.collect(Collectors.groupingBy(
                         MonthlyMortgage::getYear, Collectors.groupingBy(m -> m.getInstitute().getName(),
                                 Collectors.summingInt(MonthlyMortgage::getAmount100M))));
-        Stream<AggregatedByYearAndName> triplets = groupedByYearAndName.entrySet().stream().flatMap(entry -> {
+        Stream<AggregatedByYearAndName> triplets = sumByYearAndName.entrySet().stream().flatMap(entry -> {
             Integer year = entry.getKey();
 
             return entry.getValue()
