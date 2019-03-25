@@ -28,10 +28,10 @@ public class AuthController {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    @PostMapping("/signon")
-    public Callable<Void> signOn(@Valid @RequestBody final AuthRequest authRequest) {
+    @PostMapping("/signup")
+    public Callable<Void> signUp(@Valid @RequestBody final AuthRequest authRequest) {
         return () -> {
-            userService.signOn(authRequest.getId(), authRequest.getPassword());
+            userService.signUp(authRequest.getId(), authRequest.getPassword());
             return null;
         };
     }

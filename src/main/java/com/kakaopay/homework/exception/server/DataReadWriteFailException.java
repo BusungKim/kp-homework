@@ -1,13 +1,13 @@
 package com.kakaopay.homework.exception.server;
 
-import com.kakaopay.homework.exception.BaseRuntimeException;
+import com.kakaopay.homework.exception.AbstractBaseException;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public class DataReadWriteFailException extends BaseRuntimeException {
+public class DataReadWriteFailException extends AbstractBaseException {
 
     private String detail;
 

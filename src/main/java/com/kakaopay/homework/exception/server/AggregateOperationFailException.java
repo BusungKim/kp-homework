@@ -1,9 +1,9 @@
 package com.kakaopay.homework.exception.server;
 
-import com.kakaopay.homework.exception.BaseRuntimeException;
+import com.kakaopay.homework.exception.AbstractBaseException;
 import org.springframework.http.HttpStatus;
 
-public class AggregateOperationFailException extends BaseRuntimeException {
+public class AggregateOperationFailException extends AbstractBaseException {
 
     @Override
     public HttpStatus getHttpStatus() {

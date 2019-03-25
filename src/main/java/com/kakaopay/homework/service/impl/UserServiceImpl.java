@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void signOn(String userId, String password) throws InvalidAuthInfoException {
+    public void signUp(String userId, String password) throws InvalidAuthInfoException {
         if (Strings.isNullOrEmpty(userId) || Strings.isNullOrEmpty(password)) {
             throw new InvalidAuthInfoException("Empty value is not allowed.");
         }

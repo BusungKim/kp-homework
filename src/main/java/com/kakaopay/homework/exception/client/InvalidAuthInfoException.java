@@ -1,13 +1,13 @@
 package com.kakaopay.homework.exception.client;
 
-import com.kakaopay.homework.exception.BaseRuntimeException;
+import com.kakaopay.homework.exception.AbstractBaseException;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public class InvalidAuthInfoException extends BaseRuntimeException {
+public class InvalidAuthInfoException extends AbstractBaseException {
 
     private String detail;
 

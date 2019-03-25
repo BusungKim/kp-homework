@@ -1,7 +1,10 @@
 package com.kakaopay.homework.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kakaopay.homework.domain.response.ApiError;
 import com.kakaopay.homework.support.JwtTokenProvider;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -13,6 +16,7 @@ import java.io.IOException;
 @Slf4j
 public class JwtTokenFilter extends OncePerRequestFilter {
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private JwtTokenProvider jwtTokenProvider;
 
     public JwtTokenFilter(JwtTokenProvider jwtTokenProvider) {
@@ -26,7 +30,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         if (token != null && jwtTokenProvider.validateToken(token)) {
             filterChain.doFilter(request, response);
         } else {
-            throw new RuntimeException();
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType("application/json");
+            String responseString = objectMapper.writeValueAsString(new ApiError("Invalid bearer token"));
+            response.getWriter().write(responseString);
         }
     }
 }

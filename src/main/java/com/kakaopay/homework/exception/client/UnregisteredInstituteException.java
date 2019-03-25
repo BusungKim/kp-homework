@@ -1,9 +1,9 @@
 package com.kakaopay.homework.exception.client;
 
-import com.kakaopay.homework.exception.BaseRuntimeException;
+import com.kakaopay.homework.exception.AbstractBaseException;
 import org.springframework.http.HttpStatus;
 
-public class UnregisteredInstituteException extends BaseRuntimeException {
+public class UnregisteredInstituteException extends AbstractBaseException {
 
     @Override
     public HttpStatus getHttpStatus() {
