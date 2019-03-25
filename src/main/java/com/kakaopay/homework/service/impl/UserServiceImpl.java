@@ -59,9 +59,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public SignInResponse refreshToken(String token) throws InvalidAuthInfoException {
         String userId = jwtTokenProvider.getUserId(token);
-        if (userRepository.findOne(userId) == null) {
+        if (userId == null || userRepository.findOne(userId) == null) {
             throw new InvalidAuthInfoException("There is no user registered with given id.");
         }
+
         return SignInResponse.builder().userId(userId).token(jwtTokenProvider.createToken(userId)).build();
     }
 }

@@ -37,11 +37,9 @@ public class V1Controller {
     }
 
     @PostMapping("/local-csv")
-    public Callable<Void> persistLocalCsv(
-            @RequestBody final LocalFileReadRequest localFileReadRequest) {
+    public Callable<Void> persistLocalCsv(@RequestBody final LocalFileReadRequest localFileReadRequest) {
         return () -> {
-            dataReadService.readAndStoreData(localFileReadRequest.getFileName(),
-                    localFileReadRequest.getCharset());
+            dataReadService.readAndStoreData(localFileReadRequest.getFileName(), localFileReadRequest.getCharset());
             return null;
         };
     }

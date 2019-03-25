@@ -5,8 +5,9 @@ import lombok.Data;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class LocalFileReadRequest {
+public class AuthRequest {
     @NotNull
-    private String fileName;
-    private String charset = "UTF-8";
+    private String id;
+    @NotNull
+    private String password;
 }

@@ -1,6 +1,5 @@
 package com.kakaopay.homework.filter;
 
-import com.kakaopay.homework.exception.client.AuthorizationFailException;
 import com.kakaopay.homework.support.JwtTokenProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -27,7 +26,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         if (token != null && jwtTokenProvider.validateToken(token)) {
             filterChain.doFilter(request, response);
         } else {
-            throw new AuthorizationFailException();
+            throw new RuntimeException();
         }
     }
 }

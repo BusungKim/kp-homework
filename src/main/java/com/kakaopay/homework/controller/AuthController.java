@@ -1,18 +1,22 @@
 package com.kakaopay.homework.controller;
 
+import com.kakaopay.homework.domain.request.AuthRequest;
 import com.kakaopay.homework.domain.response.SignInResponse;
 import com.kakaopay.homework.service.UserService;
 import com.kakaopay.homework.support.JwtTokenProvider;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.concurrent.Callable;
 
 @RestController
 @RequestMapping("/auth")
+@Slf4j
 public class AuthController {
 
     private final UserService userService;
@@ -25,18 +29,16 @@ public class AuthController {
     }
 
     @PostMapping("/signon")
-    public Callable<Void> signOn(@RequestParam("id") final String userId,
-                                 @RequestParam("password") final String password) {
+    public Callable<Void> signOn(@Valid @RequestBody final AuthRequest authRequest) {
         return () -> {
-            userService.signOn(userId, password);
+            userService.signOn(authRequest.getId(), authRequest.getPassword());
             return null;
         };
     }
 
     @PostMapping("/signin")
-    public Callable<SignInResponse> signIn(@RequestParam("id") final String userId,
-                                           @RequestParam("password") final String password) {
-        return () -> userService.signIn(userId, password);
+    public Callable<SignInResponse> signIn(@Valid @RequestBody final AuthRequest authRequest) {
+        return () -> userService.signIn(authRequest.getId(), authRequest.getPassword());
     }
 
     @PostMapping("/refresh")

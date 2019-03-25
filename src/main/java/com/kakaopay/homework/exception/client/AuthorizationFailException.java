@@ -1,11 +1,9 @@
 package com.kakaopay.homework.exception.client;
 
-import com.kakaopay.homework.exception.BaseException;
+import com.kakaopay.homework.exception.BaseRuntimeException;
 import org.springframework.http.HttpStatus;
 
-import javax.servlet.ServletException;
-
-public class AuthorizationFailException extends ServletException implements BaseException {
+public class AuthorizationFailException extends BaseRuntimeException {
 
     @Override
     public HttpStatus getHttpStatus() {
