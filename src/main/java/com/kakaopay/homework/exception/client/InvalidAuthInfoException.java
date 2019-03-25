@@ -13,7 +13,7 @@ public class InvalidAuthInfoException extends BaseRuntimeException {
 
     @Override
     public HttpStatus getHttpStatus() {
-        return HttpStatus.UNAUTHORIZED;
+        return HttpStatus.BAD_REQUEST;
     }
 
     @Override
