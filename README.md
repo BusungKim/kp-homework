@@ -110,19 +110,19 @@ public class User {
 #### 연도별 각 기관의 전체 지원금액 중 가장 큰 금액과 기관명
 1. 모든 `MonthlyMortgage`를 `year`와 `Institute`의 `name`으로 grouping 합니다. 결과는 `Map<Integer, Map<String, List<MonthlyMortgage>>>`가 될 것입니다.
 2. 1의 결과를 이용해서 (연도, 금융기관)별 지원금액 합계를 계산합니다. 결과는 `Map<Integer, Map<String, Integer>>`가 될 것입니다
-3. 모든 (연도, 금융기관)의 지원금액 합계 중 최대를 찾기 위해, 2의 결과를 Flatten하여 Linear한 형태로 만들어줍니다. 결과는 `List<year, name, sumOfAmount>` 형태가 될 것입니다.
-4. 3의 결과에서 `sumOfAmount`가 최대가 되는 `(year, name, sumOfAmount)` Triplet을 찾습니다.
+3. 모든 (연도, 금융기관)의 지원금액 합계 중 최대를 찾기 위해, 2의 결과를 Flatten하여 Linear한 형태로 만들어줍니다. 결과는 `Collection<year, name, sumOfAmount>` 형태가 될 것입니다.
+4. 3의 결과에서 `amount`의 합이 최대가 되는 `(year, name, sumOfAmount)` Triplet을 찾습니다.
 #### 특정 기관의 연도별 지원금액 평균 중 가장 큰 금액과 가장 작은 금액
 1. 입력으로 받은 금융기관의 `code`를 이용하여 `Institute` Entity를 찾습니다.
-2. 1에서 찾은 `Institute`는 자신의 모든 월별 지원금액의 리스트를 역참조하고 있습니다. 이는 `List<MonthlyMortgage>` 형태로 정의 되어 있습니다.
+2. 1에서 찾은 `Institute`는 자신의 모든 월별 지원금액의 리스트를 역참조하고 있습니다. 이는 `List<MonthlyMortgage>` 형태로 정의되어 있습니다.
 3. 2에서 찾은 `List<MonthlyMortgage>`를 `year`로 grouping 합니다. 결과는 `Map<Integer, List\<MonthlyMortgage>>` 형태가 될 것입니다.
 4. 3의 결과에서 각 value(`List<MonthlyMortgage>`)에 대한 평균값을 계산합니다. 결과는 `Map<Integer, Double>`이 될 것입니다.
 5. 4의 결과를 Flatten하여 Linear한 `Collection`으로 변환한 이후, 최대와 최소를 각각 계산합니다.
 #### JWT 인증
 * 유저의 비밀번호는 Base64로 encoding하여 DB에 저장합니다.
-* JWT Token은 HS256 Algorithm을 사용하여 encoding 하는데, 이 때, `application.yml`에 정의된 256bits Secret key를 사용합니다.
+* JWT Token은 HS256 Algorithm을 사용하여 encoding 하는데, 이 때 `application.yml`에 정의된 256bits Secret key를 사용합니다.
 * JWT Token의 만료기한은 발급된 시간으로부터 1시간 입니다. `application.yml`에서 만료기한을 설정할 수 있습니다.
-* JWT Token은 payload에 UserId를 포함하고 있습니다. 이 UserId를 이용하여 유저 인증을 수행합니다.
+* JWT Token은 payload에 유저의 ID를 포함하고 있습니다. 이를 이용하여 유저 인증을 수행합니다.
 ## API 목록
 ### Sign Up
 유저의 ID와 Password를 입력받아 DB에 저장합니다.
