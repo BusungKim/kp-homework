@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.kakaopay.homework.config.InstituteConfig;
 import com.kakaopay.homework.dao.InstituteRepository;
 import com.kakaopay.homework.dao.MonthlyMortgageRepository;
-import com.kakaopay.homework.domain.CsvMeta;
 import com.kakaopay.homework.domain.Record;
 import com.kakaopay.homework.domain.entity.Institute;
 import com.kakaopay.homework.domain.entity.MonthlyMortgage;
@@ -55,9 +54,12 @@ public class DataReadServiceImpl implements DataReadService {
                 throw new DataReadWriteFailException("Wrong typed data row.");
             }
         });
+        List<Institute> institutes = instituteConfig.getNameAndCodes().stream()
+                .map(csvMeta -> instituteRepository.findByName(csvMeta.getName()))
+                .collect(Collectors.toList());
         recordsByRow.forEach(records -> {
             try {
-                storeRecords(records);
+                storeRecords(records, institutes);
             } catch (Exception e) {
                 log.error("Failed to store data.", e);
                 throw new DataReadWriteFailException();
@@ -65,14 +67,13 @@ public class DataReadServiceImpl implements DataReadService {
         });
     }
 
-    private Stream<List<String>> readCsvFromFile(String fileName, String charset) throws IOException {
-        String path = "classpath:" + fileName;
-        return textReader.read(path, charset);
-    }
-
-    private List<Record> mapDataToRecordRow(List<String> data) throws Exception {
+    List<Record> mapDataToRecordRow(List<String> data) throws Exception {
         Integer year = Integer.parseInt(data.get(0));
         Integer month = Integer.parseInt(data.get(1));
+
+        if (year < 0 || !(1 <= month && month <= 12)) {
+            throw new Exception("Invalid type of year or month");
+        }
 
         return data.stream()
                 .skip(2)
@@ -81,17 +82,15 @@ public class DataReadServiceImpl implements DataReadService {
                 .map(amount -> Record.builder()
                         .year(year)
                         .month(month)
-                        .amounts(amount)
+                        .amount(amount)
                         .build())
                 .collect(Collectors.toList());
     }
 
-    private void storeRecords(List<Record> records) throws Exception {
-        List<CsvMeta> csvMetaList = instituteConfig.getNameAndCodes();
-        List<Institute> institutes = csvMetaList.stream()
-                .map(csvMeta -> instituteRepository.findByName(csvMeta.getName()))
-                .collect(Collectors.toList());
-
+    void storeRecords(List<Record> records, List<Institute> institutes) throws Exception {
+        if (records.size() != institutes.size()) {
+            throw new Exception("The number of columns in data must be same with that of institutes");
+        }
         for (int i = 0; i < institutes.size(); ++i) {
             Record record = records.get(i);
             Institute institute = institutes.get(i);
@@ -99,11 +98,16 @@ public class DataReadServiceImpl implements DataReadService {
             MonthlyMortgage monthlyMortgage = MonthlyMortgage.builder()
                     .year(record.getYear())
                     .month(record.getMonth())
-                    .amount100M(record.getAmounts())
+                    .amount100M(record.getAmount())
                     .institute(institute)
                     .build();
             monthlyMortgageRepository.save(monthlyMortgage);
             institute.getMonthlyMortgageList().add(monthlyMortgage);
         }
+    }
+
+    private Stream<List<String>> readCsvFromFile(String fileName, String charset) throws IOException {
+        String path = "classpath:" + fileName;
+        return textReader.read(path, charset);
     }
 }

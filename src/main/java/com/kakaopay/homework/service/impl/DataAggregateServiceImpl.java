@@ -128,11 +128,11 @@ public class DataAggregateServiceImpl implements DataAggregateService {
                 .build();
     }
 
-    private Integer totalAmountOfMortgages(List<MonthlyMortgage> mortgages) {
+    Integer totalAmountOfMortgages(List<MonthlyMortgage> mortgages) {
         return mortgages.stream().collect(Collectors.summingInt(MonthlyMortgage::getAmount100M));
     }
 
-    private Double avgAmountOfMortgages(List<MonthlyMortgage> mortgages) {
+    Double avgAmountOfMortgages(List<MonthlyMortgage> mortgages) {
         return mortgages.stream().collect(Collectors.averagingInt(MonthlyMortgage::getAmount100M));
     }
 }

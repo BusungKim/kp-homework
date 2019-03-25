@@ -38,7 +38,7 @@ public class MonthlyMortgageTest {
         MonthlyMortgage monthlyMortgage = MonthlyMortgage.builder()
                 .year(2019)
                 .month(3)
-                .amount100M(105.5)
+                .amount100M(105)
                 .institute(institute)
                 .build();
 
