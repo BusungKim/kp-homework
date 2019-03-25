@@ -85,8 +85,8 @@ public class Institute {
     private List<MonthlyMortgage> monthlyMortgageList = new ArrayList<>();
 }
 ```
-- `Institute`를 효율적으로 검색하기 위해 `name`과 `code`에 모두 index를 설정했습니다. 또한, unique로 설정하여 `code`와 `name`이 중복으로 입력되지 않도록 했습니다.
-- `MonthlyMortage`는 foreign key로 `Institute`의 `id`를 가지고 있고, 이를 이용하여 해당 `Institute`와 연관관계를 가진 모든 `MonthlyMortgage`를 역참조합니다. 
+- `Institute`를 효율적으로 검색하기 위해 `name`과 `code`에 모두 index를 설정했습니다. 두 index 모두 unique로 지정하여 `code`와 `name`이 중복으로 입력되지 않도록 했습니다.
+- `MonthlyMortage`는 foreign key로 `Institute`의 `id`를 가지고 있고, `Institute`는 이를 이용하여 연관관계를 가진 모든 `MonthlyMortgage`를 역참조합니다. 
 Table 관점에서 봤을 때, `Institute`는 `MonthlyMortgage`에 대한 어떠한 foreign key도 가지지 않습니다.
 - `Institute`에 대한 정보는 `application.yml`에 정의되어 있고, 이 정보는 서버 어플리케이션이 구동되는 시점에 DB에 저장됩니다. (`class InstituteConfig`를 참고)
 #### 3. `User`
@@ -104,7 +104,7 @@ public class User {
     private String encodedPassword;
 }
 ```
-- `MonthlyMortgage`, `Institute`와는 다르게 `id`를 자동으로 생성하지 않고 입력 받은 유저의 ID를 Primary key로 사용합니다.
+- `MonthlyMortgage`, `Institute`와는 다르게 `id`를 자동으로 생성하지 않고, 입력 받은 유저의 ID를 Primary key로 사용합니다.
 ### 주요 로직
 #### 연도별 각 금융기관의 지원금액 합계
 1. 모든 `MonthlyMortgage`를 `year`를 기준으로 grouping 합니다. 결과는 다음과 같은 형태일 것입니다. (`Map<Integer, List<MonthlyMortgage>>`)
@@ -116,13 +116,13 @@ public class User {
 1. 모든 `MonthlyMortgage`를 `year`와 `Institute`의 `name`으로 grouping 합니다. 결과는 `Map<Integer, Map<String, List<MonthlyMortgage>>>`가 될 것입니다.
 2. 1의 결과를 이용해서 (연도, 금융기관)별 지원금액 합계를 계산합니다. 결과는 `Map<Integer, Map<String, Integer>>`가 될 것입니다
 3. 모든 (연도, 금융기관)의 지원금액 합계 중 최대를 찾기 위해, 2의 결과를 Flatten하여 Linear한 형태로 만들어줍니다. 결과는 `Collection<year, name, sumOfAmount>` 형태가 될 것입니다.
-4. 3의 결과에서 `amount`의 합이 최대가 되는 `(year, name, sumOfAmount)` Triplet을 찾습니다.
+4. 3의 결과에서 `amount`의 합이 최대가 되는 `(year, name, sumOfAmount)`을 찾습니다.
 #### 특정 기관의 연도별 지원금액 평균 중 가장 큰 금액과 가장 작은 금액
 1. 입력으로 받은 금융기관의 `code`를 이용하여 `Institute` Entity를 찾습니다.
 2. 1에서 찾은 `Institute`는 자신의 모든 월별 지원금액의 리스트를 역참조하고 있습니다. 이는 `List<MonthlyMortgage>` 형태로 정의되어 있습니다.
-3. 2에서 찾은 `List<MonthlyMortgage>`를 `year`로 grouping 합니다. 결과는 `Map<Integer, List\<MonthlyMortgage>>` 형태가 될 것입니다.
+3. 2에서 찾은 `List<MonthlyMortgage>`를 `year`로 grouping 합니다. 결과는 `Map<Integer, List<MonthlyMortgage>>` 형태가 될 것입니다.
 4. 3의 결과에서 각 value(`List<MonthlyMortgage>`)에 대한 평균값을 계산합니다. 결과는 `Map<Integer, Double>`이 될 것입니다.
-5. 4의 결과를 Flatten하여 Linear한 `Collection`으로 변환한 이후, 최대와 최소를 각각 계산합니다.
+5. 4의 결과를 Flatten하여 Linear한 `Collection`으로 변환한 이후, 최대와 최소를 각각 찾습니다.
 #### JWT 인증
 * 유저의 비밀번호는 Base64로 encoding하여 DB에 저장합니다.
 * JWT Token은 HS256 Algorithm을 사용하여 encoding 하는데, 이 때 `application.yml`에 정의된 256bits Secret key를 사용합니다.
