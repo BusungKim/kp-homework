@@ -99,8 +99,7 @@ public class DataAggregateServiceImpl implements DataAggregateService {
             log.error("Unregistered institute. {}", instituteCode);
             throw new UnregisteredInstituteException();
         }
-        Map<Integer, Double> avgByYear = monthlyMortgageRepository.findByInstitute(institute)
-                .stream()
+        Map<Integer, Double> avgByYear = institute.getMonthlyMortgageList().stream()
                 .collect(Collectors.groupingBy(MonthlyMortgage::getYear))
                 .entrySet()
                 .stream()
