@@ -19,7 +19,7 @@ import java.util.List;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @Slf4j
-public class MonthlyMortgageTest {
+public class IntegratedMonthlyMortgageTest {
 
     @Autowired
     private MonthlyMortgageRepository monthlyMortgageRepository;

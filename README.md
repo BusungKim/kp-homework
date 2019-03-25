@@ -22,6 +22,11 @@ Gradle Wrapper를 사용해서 jar 파일을 생성하지 않고 실행할 수 �
 ```
 ./gradlew bootRun
 ```
+### Test 실행
+Gradle Wrapper를 사용해서 Test Code를 실행할 수 있습니다.
+```
+./gradlew test
+```
 ## 문제 해결 전략
 ### Entity 정의
 #### 1. MonthlyMortgage
